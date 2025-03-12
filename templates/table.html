@@ -1,0 +1,336 @@
+{% load common %}
+<div class="card-body" id="json_div">
+
+    <div id="myModal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tracker Description</h5>
+                    <input type="hidden" id="current_choice" name="custId" value="">
+                    <button type="button" class="close btn-h" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    
+                    <form>
+                        <div class="row">
+                            <div class="col-md-10">
+
+                                <div class="text-center display-6 mb-3 ">
+                                    <div id="employee_name"> 
+                                        <h5 >Emoloyee Name</5>
+                                    </div>
+
+                                        <small id="tracker_name">Tracker</small>
+                                </div>
+
+                                
+                                <div class="mb-3">
+                                    <label for="inputUsername">Upload Image </label>
+                                    <div class="mt-2">
+                                        {% comment %} <span class="btn btn-primary"><i class="fas fa-upload"> </i> Upload</span> {% endcomment %}
+                                        <input class="btn btn-primary fas fa-upload " type='file' id="readUrl">
+
+                                    <img id="uploadedImage" src="#"  style="height:50px; width:100px"; alt="Uploaded Image" accept="image/png, image/jpeg" style="display:none;">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="inputUsername">Text Description</label>
+                                    <textarea rows="2" class="form-control" id="inputDescription"
+                                        placeholder="Tell something about yourself"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                
+                            </div>
+                        </div>
+
+                        <button type="button" id="append_data" class="btn btn-primary">Save changes</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="close btn-h" class="btn btn-h btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button"  id="append_data" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+   <div class="my-2">
+       
+         <button type="submit"   class="btn mb-1 btn-success"><i class="fas fa-check"></i> Insert</button>
+           <table id="datatables-clients" class="table table-striped" style="width:100%">
+               <thead>
+                   <tr>
+                       <th>#</th>
+                       <th>Employee</th>
+
+                       {% for date in date_list %}
+                       <th>{{date|date:"D ,d M "}}</th>
+                       {% endfor %}
+
+
+                   </tr>
+               </thead>
+               <tbody>
+
+
+                   {% for single in employee %}
+                   <tr>
+                       <td>{{forloop.counter}}</td>
+                       <td>{{single}}</td>
+
+                       {% for date in date_list %}
+                       <input id="name" type="hidden" value="{{single.id}}" name="name{{single.id}}{{date|date:"m-d"}}">
+                       <input id="name" type="hidden" value="{{date|date:'Y-m-d'}}" name="date{{single.id}}{{date|date:"m-d"}}">
+                       
+                       <input type="file" hidden class="description"   id="img{{single.id}}{{date|date:"m-d"}}" name="img{{single.id}}{{date|date:"m-d"}}" accept="image/*">
+                                                                
+                                                            
+                       <input type="hidden" class="description"  id="text{{single.id}}{{date|date:"m-d"}}" name="text{{single.id}}{{date|date:"m-d"}}" value="">
+                       
+                       <input type="hidden" value="{{single}}" id="emp_name{{single.id}}{{date|date:"m-d"}}">
+                       
+                      
+                       <td>
+                           <div>
+
+                               <select class="form-select" id="tracker{{single.id}}{{date|date:"m-d"}}" name="tracker{{single.id}}{{date|date:"m-d"}}">
+                                   {% set ga_label = 'false' %}
+                                   {% for x in single.auditee.all %}
+                                   {% if date|date:"Y-m-d"  == x.date|date:"Y-m-d" and x.criterion.tracker.id ==  criterion_m.0.tracker.id  %}
+                               
+                                   {% set ga_label = 'true' %}
+                                   <option value="0"  class="others" selected>{{x}} </option>
+                                   
+
+
+                                   {% elif ga_label == 'false' and forloop.last %}
+                                   {% set ga_label = 'false' %}
+                                   <option value="none" >unaudited</option> 
+                                   {% endif %}
+
+                                   {% empty %}
+                                   {% set ga_label = 'false' %}
+                                   <option value="none">unaudited</option>
+
+                                   {% endfor %}
+                   
+                                   {% for x  in criterion_m %}
+                           
+                                   <option value="{{x.id}}">{{x}}</option>
+                                   {% endfor %}
+                               </select>
+                           </div>
+                           <div id="container{{single.id}}{{date|date:"m-d"}}">
+
+
+                            <button type="button" name="button{{single.id}}{{date|date:"m-d"}}" class="btn btn-s btn-sm btn-primary fas fa-camera"></button>
+
+                            
+                        </div>
+                       </td>
+
+
+                       {% endfor %}
+
+
+                   </tr>
+                   {% endfor %}
+
+
+               </tbody>
+           </table>
+           <button type="submit"   class="btn mb-1 btn-success"><i class="fas fa-check"></i> Insert</button>
+       </form>
+
+
+   </div>
+</div>
+
+<script>
+   
+
+    
+    document.getElementById("append_data").addEventListener("click", function(){
+
+        
+        var uploadedImage =  document.getElementById('uploadedImage')
+        var uploadedImagesrc =  document.getElementById('readUrl')
+        var description  = document.getElementById('inputDescription').value
+        var current_choice  = document.getElementById('current_choice').value;
+        console.log(current_choice)
+
+        
+        var image_id  = current_choice.replace(/button/g, 'img')
+        var description_id  = current_choice.replace(/button/g, 'text')
+
+        $("#"+description_id).val(description);
+        
+        image = document.getElementById(image_id)
+        
+         // Get a reference to the  file input
+        let fileInput1 = document.getElementById('readUrl');
+        
+        let file1 = fileInput1.files[0];
+
+
+        if (file1) {
+
+                // Create a new file object with the same data as file1
+        let file2 = new File([file1], file1.name, {
+            type: file1.type
+        });
+
+
+         // create a DataTransfer to get a FileList
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file2);
+        let fileInput2 = document.getElementById(image_id);
+        fileInput2.files = dataTransfer.files;
+        
+        
+          }
+    
+        //  <button type="button" name="button{{single.id}}{{date|date:"m-d"}}"  
+        //class="btn btn-s btn-sm btn-primary fas fa-eye"></button>
+        
+        let viewButton_id  = current_choice.replace(/button/g, 'viewbutton')
+        var button = document.getElementById(viewButton_id); 
+
+        if (button == null) {
+          // button with specified ID exists
+          const viewButton = document.createElement('button')
+          viewButton.className  = 'btn btn-s btn-sm btn-primary fas fa-eye'
+  
+          let viewButton_id  = current_choice.replace(/button/g, 'viewbutton') 
+          console.log(viewButton_id)
+          viewButton.setAttribute("name",viewButton_id)
+          viewButton.setAttribute("id",viewButton_id)
+          viewButton.setAttribute("type","button")
+  
+          viewButton.addEventListener("click", viewPreviewData);
+  
+          var container_id  = current_choice.replace(/button/g, 'container')
+          container = document.getElementById(container_id)
+          container.append(viewButton)
+          
+  
+        } 
+
+        
+    
+
+
+
+        $("#myModal").modal('hide');
+    });
+
+
+
+    function viewPreviewData(e){
+
+
+        let data_id = e.target.getAttribute('name')
+    
+        let image_id  = data_id.replace(/viewbutton/g, 'img')
+        let text_id  = data_id.replace(/viewbutton/g, 'text')
+        
+        let img = document.getElementById(image_id)
+
+        let paragraph  = document.getElementById('perviewText')
+        paragraph.innerText    =   document.getElementById(text_id).value
+        const file = img.files[0];
+        // Create a new FileReader object
+        const reader = new FileReader();
+        // Set a callback function to run when the file is loaded
+        reader.onload = () => {
+          // Set the image source to the result of the FileReader
+          document.getElementById('previewImage').src  = reader.result;
+
+        };
+        reader.readAsDataURL(file);
+        $("#showPreview").modal('show');
+    }
+
+    
+
+</script>
+
+
+<script>
+
+
+    //show modal 
+    $(document).ready(function(){
+
+
+        $(".btn-s").click(function(e){
+
+            button_id = e.target.name;
+            var employe_id = button_id.replace(/button/g, 'emp_name')
+            var tracker_id  = button_id.replace(/button/g, 'tracker')
+            console.log(tracker_id)
+            
+
+            var tracker_name = document.getElementById(tracker_id)
+            console.log(tracker_name)
+            var employee_name = document.getElementById(employe_id)
+        
+            var selectedOption = tracker_name.options[tracker_name.selectedIndex];
+            var selectedText = selectedOption.text;
+
+            console.log(employee_name)
+            console.log(selectedText)
+            $('#employee_name').text(employee_name.value);
+            $('#tracker_name').text(selectedOption.text);
+            $('#current_choice').val(button_id);
+            console.log(button_id)
+
+            
+            $("#myModal").modal('show');
+
+
+            
+
+        
+
+
+        });
+
+
+        $(".btn-h").click(function(){
+            $("#myModal").modal('hide');
+        });
+
+
+
+        var myModal = document.getElementById('showPreview');
+        var myBtn = document.getElementById('preview');
+        
+
+        $(".closePreview").click(function(){
+
+            $("#showPreview").modal('hide');
+        });
+        
+
+
+        
+
+        
+    });
+</script>
+
+
+<script>
+//read input from the upload feild and display 
+    document.getElementById('readUrl').addEventListener('change', function(){
+        if (this.files[0] ) {
+          var picture = new FileReader();
+          picture.readAsDataURL(this.files[0]);
+          picture.addEventListener('load', function(event) {
+            document.getElementById('uploadedImage').setAttribute('src', event.target.result);
+            document.getElementById('uploadedImage').style.display = 'block';
+          });
+        }
+      });
+</script>
